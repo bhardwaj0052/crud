@@ -1,28 +1,42 @@
 import { useNavigate, useParams } from "react-router-dom";
 import "../index.css";
-import type { User } from "../types/user";
+import { useEffect, useState } from "react";
+import { getTaskById } from "../services/TaskService";
+import type { Task } from "../types/task";
 
-interface Prop {
-  users: User[];
-}
-
-export default function UserCard({ users }: Prop) {
+export default function TaskCard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = users.find((u) => u.id === Number(id));
-
-  if (!user) return <div>User not found</div>;
+  const[task,setTask] = useState<Task | null>(null);
+  useEffect(()=>{
+    if (!id) return;
+    const gettask= async()=>{
+      try {
+      const response = await getTaskById(id);
+      setTask(response);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    gettask();
+  },[id])
+  if (!task) return <div>Task not found</div>;
 
   return (
-    <div className="user-card">
-      <div className="row">
-        <div className="initials">{user.id}</div>
-        <div>
-          <div className="name">{user.name}</div>
-          <div className="email">{user.email}</div>
-        </div>
-      </div>
-      <button onClick={() => navigate("/users")}>Back</button>
+   <div className="Task-card">
+  <div className="row">
+    <div className="initials">{task.id}</div>
+    <div>
+      <div className="name">{task.title}</div>
+      <div className="email">{task.description}</div>
     </div>
+  </div>
+  <div>
+    <span>Priority: {task.priority}</span>
+    <span>Status: {task.status}</span>
+  </div>
+  <button onClick={() => navigate("/task")}>Back</button>
+</div>
   );
 }
+
